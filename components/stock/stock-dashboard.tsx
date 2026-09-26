@@ -17,15 +17,17 @@ import type { Dealer, DealerStocks } from "@/types/stock";
 export function StockDashboard({
   stocks,
   initialNow,
+  isDemo = true,
 }: {
   stocks: DealerStocks;
   initialNow: number;
+  isDemo?: boolean;
 }) {
   const [dealer, setDealer] = useState<Dealer>("normal");
   const stock = stocks[dealer];
   const { now, isRefreshing, refresh } = useStockClock(
     initialNow,
-    stock.expiresAt,
+    stock.status === "unavailable" ? undefined : stock.expiresAt,
   );
   const status =
     stock.status === "live" && now >= Date.parse(stock.expiresAt)
@@ -42,6 +44,8 @@ export function StockDashboard({
           expiresAt={stock.expiresAt}
           now={now}
           intervalHours={DEALERS[dealer].intervalHours}
+          isDemo={isDemo}
+          available={status !== "unavailable"}
         />
       </PageHeading>
       <div className="dealer-toolbar">
@@ -106,7 +110,9 @@ export function StockDashboard({
         <div className="stock-bottom-note">
           <span>
             <Info size={14} aria-hidden="true" />
-            Demo mode · Stock and prices are sample data.
+            {isDemo
+              ? "Demo mode · Stock and prices are sample data."
+              : "Stored stock · Freshness is based on the recorded rotation times."}
           </span>
           <Link href="/history">
             <Clock3 size={14} aria-hidden="true" />

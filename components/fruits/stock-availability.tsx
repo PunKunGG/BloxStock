@@ -9,17 +9,23 @@ export function StockAvailability({
   fruitId,
   stocks,
   initialNow,
+  isDemo = true,
 }: {
   fruitId: string;
   stocks: DealerStocks;
   initialNow: number;
+  isDemo?: boolean;
 }) {
-  const expiry = [stocks.normal.expiresAt, stocks.mirage.expiresAt].sort()[0];
+  const expiry = Object.values(stocks)
+    .filter((stock) => stock.status !== "unavailable")
+    .map((stock) => stock.expiresAt)
+    .sort()[0];
   const { now } = useStockClock(initialNow, expiry);
   return (
     <div className="availability">
       <h2>
-        Current stock status <span className="sample-tag">SAMPLE</span>
+        Current stock status{" "}
+        <span className="sample-tag">{isDemo ? "SAMPLE" : "STORED"}</span>
       </h2>
       <div className="availability-dealers">
         {(["normal", "mirage"] as const).map((dealer) => {
