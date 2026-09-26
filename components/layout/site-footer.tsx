@@ -1,6 +1,6 @@
 import { Brand } from "@/components/ui/brand";
 
-export function SiteFooter() {
+export function SiteFooter({ isDemo = true }: { isDemo?: boolean }) {
   return (
     <footer className="site-footer container-shell">
       <div>
@@ -9,7 +9,10 @@ export function SiteFooter() {
       </div>
       <div className="footer-notes">
         <span>Made for the Blox Fruits community.</span>
-        <p>Sample stock & prices. Not affiliated with Roblox or Gamer Robot.</p>
+        <p>
+          {isDemo && "Sample stock & prices. "}Not affiliated with Roblox or
+          Gamer Robot.
+        </p>
       </div>
     </footer>
   );

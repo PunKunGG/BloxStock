@@ -17,11 +17,13 @@ export function HistoryBrowser({
   fruits,
   initialDealer = "normal",
   initialFruitId = "",
+  isDemo = true,
 }: {
   rotations: StockRotationView[];
   fruits: Fruit[];
   initialDealer?: Dealer;
   initialFruitId?: string;
+  isDemo?: boolean;
 }) {
   const [dealer, setDealer] = useState<Dealer>(initialDealer);
   const [fruitId, setFruitId] = useState(initialFruitId);
@@ -103,7 +105,8 @@ export function HistoryBrowser({
       </div>
       <div className="history-summary">
         <span role="status">
-          {filtered.length} sample rotation{filtered.length === 1 ? "" : "s"}
+          {filtered.length} {isDemo ? "sample" : "stored"} rotation
+          {filtered.length === 1 ? "" : "s"}
           {fruitId &&
             ` with ${fruits.find((fruit) => fruit.id === fruitId)?.name}`}
         </span>
@@ -137,12 +140,20 @@ export function HistoryBrowser({
         </div>
       ) : (
         <EmptyState
-          title="No rotations found"
-          description="This fruit did not appear for the selected dealer and date. Try changing your filters."
+          title={
+            rotations.length ? "No rotations found" : "No stored rotations yet"
+          }
+          description={
+            rotations.length
+              ? "This fruit did not appear for the selected dealer and date. Try changing your filters."
+              : "Stock history will appear after verified rotations are saved."
+          }
           action={
-            <button className="button button-primary" onClick={reset}>
-              Clear filters
-            </button>
+            rotations.length > 0 && (
+              <button className="button button-primary" onClick={reset}>
+                Clear filters
+              </button>
+            )
           }
         />
       )}
@@ -161,8 +172,10 @@ export function HistoryBrowser({
         </div>
       )}
       <p className="history-disclaimer">
-        <Info size={14} aria-hidden="true" />A rolling 7-day sample history.
-        These are demonstration rotations.
+        <Info size={14} aria-hidden="true" />
+        {isDemo
+          ? "A rolling 7-day sample history. These are demonstration rotations."
+          : "Stored rotations from the last 7 days. No synthetic history is generated."}
       </p>
     </section>
   );

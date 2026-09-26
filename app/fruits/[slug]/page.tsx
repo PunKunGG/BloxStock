@@ -17,6 +17,7 @@ import { getFruit } from "@/lib/fruits/getFruits";
 import { getStockHistory } from "@/lib/history/getStockHistory";
 import { getDealerStocks } from "@/lib/stock/getCurrentStock";
 import { getRequestTime } from "@/lib/request-time";
+import { isDemoData } from "@/lib/providers/data-provider";
 import { DEALERS } from "@/lib/stock/config";
 import { formatDate, formatMoney, formatNumber, formatTime } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: fruit ? `${fruit.name} Fruit` : "Fruit not found",
     description: fruit
-      ? `Check ${fruit.name}'s sample dealer availability, ${fruit.rarity.toLowerCase()} rarity, prices, and recent stock appearances.`
+      ? `Check ${fruit.name}'s dealer availability, ${fruit.rarity.toLowerCase()} rarity, prices, and recent stock appearances.`
       : undefined,
   };
 }
@@ -41,12 +42,17 @@ export default async function FruitDetailPage({ params }: Props) {
     getDealerStocks(now),
     getStockHistory({ fruitId: fruit.id }, now),
   ]);
-  const current = Object.values(stocks).filter((stock) =>
+  const known = Object.values(stocks).filter((stock) =>
     stock.fruits.some((item) => item.id === fruit.id),
   );
-  const appearances = [...current, ...history].sort(
-    (a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt),
+  const current = known.filter(
+    (stock) => stock.status === "live" && Date.parse(stock.expiresAt) > now,
   );
+  const appearances = [
+    ...new Map(
+      [...known, ...history].map((stock) => [stock.id, stock]),
+    ).values(),
+  ].sort((a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt));
   const lastSeen = appearances[0]?.observedAt;
 
   return (
@@ -111,6 +117,7 @@ export default async function FruitDetailPage({ params }: Props) {
             fruitId={fruit.id}
             stocks={stocks}
             initialNow={now}
+            isDemo={isDemoData()}
           />
           <div className="last-seen">
             <span>
@@ -130,7 +137,10 @@ export default async function FruitDetailPage({ params }: Props) {
               <History size={19} aria-hidden="true" />
               Recent appearances
             </h2>
-            <p>The latest sample rotations featuring {fruit.name}.</p>
+            <p>
+              The latest {isDemoData() ? "sample" : "stored"} rotations
+              featuring {fruit.name}.
+            </p>
           </div>
           <Link
             href={`/history?fruit=${fruit.id}${appearances[0]?.dealer === "mirage" ? "&dealer=mirage" : ""}`}
@@ -167,7 +177,9 @@ export default async function FruitDetailPage({ params }: Props) {
         )}
       </section>
       <p className="page-footnote">
-        Prototype preview · Availability, history, and prices are sample data.
+        {isDemoData()
+          ? "Prototype preview · Availability, history, and prices are sample data."
+          : "Availability reflects stored records and their original rotation times."}
       </p>
     </>
   );

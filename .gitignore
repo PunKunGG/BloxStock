@@ -1,5 +1,7 @@
 node_modules/
 .next/
+.next-empty-test/
+supabase/.temp/
 out/
 .env*
 !.env.example

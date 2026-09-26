@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { isDemoData } from "@/lib/providers/data-provider";
 import "./globals.css";
 
 const inter = localFont({
@@ -28,13 +29,15 @@ export const metadata: Metadata = {
     template: "%s | BloxStock",
   },
   description:
-    "Track Blox Fruits dealer stock, browse fruits, and check previous stock rotations. An independent stock tracker prototype with sample data.",
+    "Track Blox Fruits dealer stock, browse fruits, and check previous stock rotations. An independent Blox Fruits stock tracker.",
   applicationName: "BloxStock",
 };
 export const viewport: Viewport = {
   themeColor: "#0c1019",
   colorScheme: "dark",
 };
+
+export const dynamic = "force-dynamic";
 
 export default function RootLayout({
   children,
@@ -45,7 +48,7 @@ export default function RootLayout({
         <a className="skip-link" href="#main-content">
           Skip to content
         </a>
-        <SiteHeader />
+        <SiteHeader isDemo={isDemoData()} />
         <main
           id="main-content"
           className="container-shell main-content"
@@ -53,7 +56,7 @@ export default function RootLayout({
         >
           {children}
         </main>
-        <SiteFooter />
+        <SiteFooter isDemo={isDemoData()} />
       </body>
     </html>
   );

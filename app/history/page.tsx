@@ -4,12 +4,13 @@ import { PageHeading } from "@/components/ui/page-heading";
 import { HistoryBrowser } from "@/components/history/history-browser";
 import { getStockHistory } from "@/lib/history/getStockHistory";
 import { getFruits } from "@/lib/fruits/getFruits";
+import { isDemoData } from "@/lib/providers/data-provider";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Stock History",
   description:
-    "Browse previous sample Blox Fruits dealer rotations and filter by fruit, dealer, and date.",
+    "Browse previous Blox Fruits dealer rotations and filter by fruit, dealer, and date.",
 };
 
 export default async function HistoryPage({
@@ -17,11 +18,19 @@ export default async function HistoryPage({
 }: {
   searchParams: Promise<{ fruit?: string; dealer?: string }>;
 }) {
-  const [rotations, fruits, params] = await Promise.all([
+  const [rotations, catalog, params] = await Promise.all([
     getStockHistory(),
     getFruits(),
     searchParams,
   ]);
+  // Retired fruits still need working filters when they appear in stored history.
+  const fruits = [
+    ...new Map(
+      [...catalog, ...rotations.flatMap((rotation) => rotation.fruits)].map(
+        (fruit) => [fruit.id, fruit],
+      ),
+    ).values(),
+  ];
   const fruitId = fruits.some((fruit) => fruit.id === params.fruit)
     ? params.fruit
     : "";
@@ -37,7 +46,9 @@ export default async function HistoryPage({
           <Clock3 size={22} aria-hidden="true" />
           <div>
             <strong>7 days</strong>
-            <span>of sample rotations</span>
+            <span>
+              {isDemoData() ? "of sample rotations" : "of stored rotations"}
+            </span>
           </div>
         </div>
       </PageHeading>
@@ -47,6 +58,7 @@ export default async function HistoryPage({
         fruits={fruits}
         initialDealer={dealer}
         initialFruitId={fruitId}
+        isDemo={isDemoData()}
       />
     </>
   );

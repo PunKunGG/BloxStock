@@ -79,12 +79,18 @@ export function FruitDirectory({ fruits }: { fruits: Fruit[] }) {
         </div>
       ) : (
         <EmptyState
-          title="No fruits found"
-          description="Try another name or a different rarity."
+          title={fruits.length ? "No fruits found" : "Fruit catalog is empty"}
+          description={
+            fruits.length
+              ? "Try another name or a different rarity."
+              : "No fruit metadata has been imported yet."
+          }
           action={
-            <button className="button button-primary" onClick={reset}>
-              Clear filters
-            </button>
+            fruits.length > 0 && (
+              <button className="button button-primary" onClick={reset}>
+                Clear filters
+              </button>
+            )
           }
         />
       )}
